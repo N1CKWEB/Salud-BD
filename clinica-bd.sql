@@ -4,6 +4,7 @@
  # Creación de las tablas
  # 1. Médico
  CREATE TABLE IF NOT EXISTS medico(
+ 
  );
  
  
