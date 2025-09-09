@@ -2,8 +2,9 @@
  CREATE DATABASE IF NOT EXISTS clinica;
  
  # Creación de las tablas
- # 1. Médico
+ # 1. Médico SLDNVKLSDLKNDSFBLKNDFBLALKNADSFBLKMNADFB
  CREATE TABLE IF NOT EXISTS medico(
+ 
  
  );
  
