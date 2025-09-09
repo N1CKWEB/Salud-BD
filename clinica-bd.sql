@@ -2,9 +2,8 @@
  CREATE DATABASE IF NOT EXISTS clinica;
  
  # Creación de las tablas
- # 1. Médico SLDNVKLSDLKNDSFBLKNDFBLALKNADSFBLKMNADFB
+ # 1. Médico
  CREATE TABLE IF NOT EXISTS medico(
- 
  
  );
  
@@ -43,7 +42,15 @@
 
 # 7. Factura
  CREATE TABLE IF NOT EXISTS factura(
- 
+ 	id_factura INT AUTO_INCREMENT PRIMARY KEY,
+ 	fecha_emision DATE NOT NULL,
+ 	monto DECIMAL(10,2) NOT NULL,
+ 	metodo_pago ENUM('efectivo', 'tarjeta', ' transferencia', 'obra_social') NOT NULL,
+ 	id_turno INT NOT NULL,
+ 	CONSTRAINT fk_factura_turno FOREING KEY (id_turno)
+ 		REFERENCES turno(id_turno)
+ 		ON DELETE CASCADE
+ 		ON UPDATE CASCADE
  );
  
  # 8.  Estado_turno
