@@ -1,13 +1,48 @@
 # -- Consultas
 # 1)_ Pacientes y médicos, listar todos los turnos programados mostrando nombre del paciente, nombre del médico, especialidad y consultorio, solo de aquellos que no fueron cancelados.
+SELECT p.nombre, m.nombre, m.especialidad, co.nombre FROM turno t
+JOIN paciente p ON p.id_paciente = t.id_paciente
+JOIN medico m ON m.id_medico = t.id_medico
+JOIN consultorio co ON co.id_consultorio = t.id_consultorio
+JOIN estado_turno es ON es.id_estado_turno = t.id_estado_turno
+WHERE NOT es.nombre = 'Cancelado';
 
 # 2)_ Diagnósticos recientes, obtener los diagnósticos realizados en los últimos 7 días, mostrando el nombre y apellido del paciente, la fecha del turno y la descripción del diagnóstico.
+SELECT p.nombre, p.apellido, t.fecha, di.descripcion FROM diagnostico di
+JOIN turno t ON di.id_turno = t.id_turno
+JOIN paciente p ON p.id_paciente = t.id_paciente
+WHERE di.fecha_diagnostico >= NOW() - INTERVAL 7 DAY; # calcula la fecha de hoy NOW() menos 7 días.
+
 
 # 3)_ Facturación total por especialidad, calcular la suma de los montos facturados agrupados por especialidad médica. Mostrar también el promedio de facturación por especialidad.
+SELECT m.especialidad,
+       SUM(f.monto) AS total_facturado,
+       AVG(f.monto) AS promedio_factura
+FROM factura f
+JOIN paciente p ON p.id_paciente = f.id_paciente
+JOIN turno t ON t.id_paciente = p.id_paciente
+JOIN medico m ON m.id_medico = t.id_medico
+GROUP BY m.especialidad;
 
 # 4)_ Médico con más turnos confirmados, determinar qué médico tiene la mayor cantidad de turnos en estado "Confirmado", mostrando nombre, apellido y cantidad de turnos.
+SELECT m.nombre, m.apellido, COUNT(*) AS cantidad_turnos FROM turno t
+JOIN medico m ON m.id_medico = t.id_medico
+JOIN estado_turno es ON es.id_estado_turno = t.id_estado_turno
+WHERE es.nombre = 'Confirmado'
+GROUP BY m.id_medico, m.nombre, m.apellido
+ORDER BY cantidad_turnos DESC
+LIMIT 1;
+
+
 
 # 5)_ Pacientes con más de un evento clínico, listar aquellos pacientes que tienen más de un registro en el historial clínico, mostrando su nombre y la cantidad de eventos.
+SELECT p.nombre,p.apellido,COUNT(*) AS cantidad_eventos FROM historial_paciente hp
+JOIN paciente p ON p.id_paciente = hp.id_paciente
+JOIN tipo_evento tp ON tp.id_tipo_evento = hp.id_tipo_evento
+GROUP BY p.id_paciente , p.nombre , p.apellido
+HAVING COUNT(*) > 1;
+
+
 
 # 6)_ Consultorios ocupados, obtener los consultorios que tuvieron más de un turno asignado en un mismo día, indicando el nombre del consultorio, la fecha y la cantidad de turnos.
 
