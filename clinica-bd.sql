@@ -2,7 +2,7 @@
 CREATE DATABASE IF NOT EXISTS clinica;
 USE clinica;
 
--- Limpieza opcional (evita choques por definiciones previas)
+-- Limpieza opcional
 DROP TABLE IF EXISTS diagnostico;
 DROP TABLE IF EXISTS historial_paciente;
 DROP TABLE IF EXISTS resultado_estudio;
@@ -21,7 +21,7 @@ CREATE TABLE medico (
     nombre VARCHAR(50) NOT NULL,
     apellido VARCHAR(50) NOT NULL,
     matricula VARCHAR(25) NOT NULL UNIQUE,
-    especialidad VARCHAR(50) NOT NULL,
+    especialidad VARCHAR(50) NOT NULL, 
     email VARCHAR(50) NOT NULL UNIQUE,
     telefono VARCHAR(20) NOT NULL
 );
@@ -34,10 +34,9 @@ CREATE TABLE paciente (
     dni VARCHAR(15) NOT NULL UNIQUE,
     email VARCHAR(50) NOT NULL UNIQUE,
     fecha_nacimiento DATE NOT NULL,
-    telefono VARCHAR(20) NOT NULL
-);
+    telefono VARCHAR(20) NOT NULL -
 
--- 3. Estado del turno (catálogo)
+-- 3. Estado del turno
 CREATE TABLE estado_turno (
     id_estado_turno INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(30) NOT NULL UNIQUE
@@ -51,7 +50,7 @@ CREATE TABLE consultorio (
     piso INT NOT NULL
 );
 
--- 5. Motivo de cancelación (catálogo opcional)
+-- 5. Motivo de cancelación
 CREATE TABLE motivo_cancelacion (
     id_motivo_cancelacion INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL UNIQUE,
@@ -59,7 +58,6 @@ CREATE TABLE motivo_cancelacion (
 );
 
 -- 6. Turno
--- Nota: agrego FK opcional a motivo_cancelacion y unique para evitar doble asignación del médico y del consultorio a la misma fecha/hora
 CREATE TABLE turno (
     id_turno INT AUTO_INCREMENT PRIMARY KEY,
     id_paciente INT NOT NULL,
@@ -73,14 +71,10 @@ CREATE TABLE turno (
     CONSTRAINT fk_turno_medico       FOREIGN KEY (id_medico)        REFERENCES medico(id_medico),
     CONSTRAINT fk_turno_consultorio  FOREIGN KEY (id_consultorio)   REFERENCES consultorio(id_consultorio),
     CONSTRAINT fk_turno_estado       FOREIGN KEY (id_estado_turno)  REFERENCES estado_turno(id_estado_turno),
-    CONSTRAINT fk_turno_motivo       FOREIGN KEY (id_motivo_cancelacion) REFERENCES motivo_cancelacion(id_motivo_cancelacion),
-    -- Evitar que un médico tenga dos turnos a la misma hora
-    CONSTRAINT uq_turno_medico UNIQUE (id_medico, fecha, hora),
-    -- Evitar que un consultorio tenga doble ocupación a la misma hora
-    CONSTRAINT uq_turno_consultorio UNIQUE (id_consultorio, fecha, hora)
+    CONSTRAINT fk_turno_motivo       FOREIGN KEY (id_motivo_cancelacion) REFERENCES motivo_cancelacion(id_motivo_cancelacion)
 );
 
--- 7. Diagnóstico (depende de un turno)
+-- 7. Diagnóstico
 CREATE TABLE diagnostico (
     id_diagnostico INT AUTO_INCREMENT PRIMARY KEY,
     id_turno INT NOT NULL,
@@ -89,16 +83,16 @@ CREATE TABLE diagnostico (
     CONSTRAINT fk_diagnostico_turno FOREIGN KEY (id_turno) REFERENCES turno(id_turno)
 );
 
--- 8. Factura (por paciente; los ítems podrían ir en otra tabla si se necesitara)
+-- 8. Factura
 CREATE TABLE factura (
     id_factura INT AUTO_INCREMENT PRIMARY KEY,
     id_paciente INT NOT NULL,
     fecha DATE NOT NULL,
-    monto DECIMAL(10,2) NOT NULL,
+    monto DECIMAL(10,2) NOT NULL, 
     CONSTRAINT fk_factura_paciente FOREIGN KEY (id_paciente) REFERENCES paciente(id_paciente)
 );
 
--- 9. Resultado de estudio (asociado al paciente; si querés atarlo a un turno específico, agregá id_turno NULL + FK)
+-- 9. Resultado de estudio
 CREATE TABLE resultado_estudio (
     id_resultado_estudio INT AUTO_INCREMENT PRIMARY KEY,
     id_paciente INT NOT NULL,
@@ -108,13 +102,13 @@ CREATE TABLE resultado_estudio (
     CONSTRAINT fk_resultado_paciente FOREIGN KEY (id_paciente) REFERENCES paciente (id_paciente)
 );
 
--- 10. Tipo de evento (catálogo para el historial)
+-- 10. Tipo de evento
 CREATE TABLE tipo_evento (
     id_tipo_evento INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL UNIQUE
 );
 
--- 11. Historial del paciente (usa catálogo de tipo_evento)
+-- 11. Historial del paciente
 CREATE TABLE historial_paciente (
     id_historial_paciente INT AUTO_INCREMENT PRIMARY KEY,
     id_paciente INT NOT NULL,
@@ -124,9 +118,3 @@ CREATE TABLE historial_paciente (
     CONSTRAINT fk_historial_paciente FOREIGN KEY (id_paciente) REFERENCES paciente(id_paciente),
     CONSTRAINT fk_historial_evento   FOREIGN KEY (id_tipo_evento) REFERENCES tipo_evento(id_tipo_evento)
 );
-
--- Datos de ejemplo
-INSERT INTO  medico (nombre,apellido,matricula,especialidad,email,telefono) VALUES
-('Nicolás','Perez','FR 789 ZT','Cirujia','nicolasperez021@gmail.com','261456789'),
-('Diego','Rodriguez','AG 135 OL','Pediatria','diegorodriguez39@gmail.com','261236549'),
-('Ramiro','Martin','PL 523 QN','Cardiología','ramiromartin90@gmail.com','261784026');
