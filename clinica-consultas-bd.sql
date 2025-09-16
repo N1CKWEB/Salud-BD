@@ -1,4 +1,5 @@
 # -- Consultas
+
 # 1)_ Pacientes y médicos, listar todos los turnos programados mostrando nombre del paciente, nombre del médico, especialidad y consultorio, solo de aquellos que no fueron cancelados.
 SELECT p.nombre, m.nombre, m.especialidad, co.nombre FROM turno t
 JOIN paciente p ON p.id_paciente = t.id_paciente
@@ -32,7 +33,6 @@ WHERE es.nombre = 'Confirmado'
 GROUP BY m.id_medico, m.nombre, m.apellido
 ORDER BY cantidad_turnos DESC
 LIMIT 1;
-
 
 
 # 5)_ Pacientes con más de un evento clínico, listar aquellos pacientes que tienen más de un registro en el historial clínico, mostrando su nombre y la cantidad de eventos.
