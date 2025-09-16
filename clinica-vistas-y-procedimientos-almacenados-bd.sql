@@ -29,6 +29,28 @@ SELECT * FROM view_facturacion_por_paciente;
 # Procedimientos Almacenados / Stored Procedures
 
 # 1)_ Insertar turno automáticamente, procedimiento que reciba: id_paciente, id_medico, id_consultorio, fecha, hora, y cree un turno con estado inicial "Pendiente".
+DELIMITER // 
+CREATE PROCEDURE insertar_turnos(IN t_id_paciente INT, IN t_id_medico INT, IN t_id_consultorio INT, IN t_fecha DATE, IN t_hora TIME)
+BEGIN 
+   DECLARE v_id_estado INT; # Crea una variable interna para guardar el id_estado.
+	SELECT id_estado_turno INTO v_id_estado 
+    FROM estado_turno
+    WHERE nombre = "Pendiente" 
+    LIMIT 1;
+    
+     INSERT INTO turno (id_paciente,id_medico,id_consultorio,fecha,hora,id_estado_turno) VALUES (t_id_paciente,t_id_medico,t_id_consultorio,t_fecha,t_hora,v_id_estado);
+END //
+DELIMITER ;
+
+CALL insertar_turnos(
+    1,           -- id_paciente
+    2,           -- id_medico
+    3,           -- id_consultorio
+    '2025-09-20',-- fecha
+    '10:30:00'   -- hora
+);
+
+SELECT * FROM turno;
 
 # 2)_ Facturación total por especialidad (dinámico), procedimiento que reciba una especialidad médica como parámetro y devuelva el total facturado por esa especialidad.
 
@@ -42,3 +64,7 @@ SELECT * FROM view_facturacion_por_paciente;
 # Cantidad de turnos confirmados y atendidos.
 # Total facturado por sus pacientes.
 # Cantidad de diagnósticos realizados.
+
+
+
+
