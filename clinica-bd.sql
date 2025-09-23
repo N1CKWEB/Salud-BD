@@ -34,8 +34,9 @@ CREATE TABLE paciente (
     dni VARCHAR(15) NOT NULL UNIQUE,
     email VARCHAR(50) NOT NULL UNIQUE,
     fecha_nacimiento DATE NOT NULL,
-    telefono VARCHAR(20) NOT NULL -
-
+    telefono VARCHAR(20) NOT NULL 
+    );
+    
 -- 3. Estado del turno
 CREATE TABLE estado_turno (
     id_estado_turno INT AUTO_INCREMENT PRIMARY KEY,
@@ -118,3 +119,27 @@ CREATE TABLE historial_paciente (
     CONSTRAINT fk_historial_paciente FOREIGN KEY (id_paciente) REFERENCES paciente(id_paciente),
     CONSTRAINT fk_historial_evento   FOREIGN KEY (id_tipo_evento) REFERENCES tipo_evento(id_tipo_evento)
 );
+-- 12. especialidad 
+CREATE TABLE especialidad(
+id_especialidad INT AUTO_INCREMENT PRIMARY KEY,
+nombre VARCHAR(20) NOT NULL,
+descripcion VARCHAR(150) NOT NULL
+);
+
+
+-- 13. telefono_paciente
+CREATE TABLE telefono_paciente(
+id_telefono INT AUTO_INCREMENT PRIMARY KEY,
+id_paciente INT NOT NULL,
+numero VARCHAR(20) NOT NULL,
+tipo VARCHAR(20),
+CONSTRAINT fk_paciente_medico FOREIGN KEY (id_paciente) REFERENCES paciente(id_paciente)
+);
+
+-- 14. Obra Social
+CREATE TABLE obra_social(
+ id_obra_social INT AUTO_INCREMENT PRIMARY KEY,
+ nombre VARCHAR(50) NOT NULL,
+ plan VARCHAR(50) NOT NULL
+);
+
