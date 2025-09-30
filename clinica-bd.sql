@@ -153,18 +153,54 @@ CREATE TABLE medico_especialidad (
     FOREIGN KEY (id_especialidad) REFERENCES especialidad(id_especialidad)
 );
 
+-- 16. Creación de nueva tabla historia_clinica
+CREATE TABLE historia_clinica(
+id_historia_clinica INT AUTO_INCREMENT PRIMARY KEY,
+id_paciente INT NOT NULL,
+id_medico INT NOT NULL,
+fecha_atencion DATETIME NOT NULL,
+observaciones TEXT,
+CONSTRAINT fk_hc_paciente FOREIGN KEY (id_paciente) REFERENCES pacientec(id_paciente),
+CONSTRAINT fk_hc_medico FOREIGN KEY (id_medico) REFERENCES medico (id_medico)
+);
+
+-- 17. Creación de nueva tabla diagnostico_posible o diagnostico_tipo
+CREATE TABLE diagnostico_tipo(
+id_diagnostico_tipo INT AUTO_INCREMENT PRIMARY KEY,
+nombre VARCHAR(100) NOT NULL,
+descripcion TEXT
+);
+
+-- 18. Creamos una tabla intermedia para una relación de muchos a muchos entre historia_clinica y diagnostico_tipo
+CREATE TABLE historia_clinica_diagnostico(
+id_historial_clinica INT NOT NULL,
+id_diagnostico INT NOT NULL,
+CONSTRAINT fk_hcd_hc FOREIGN KEY (id_historial_clinica) REFERENCES historial_clinica (id_historial_clinica),
+CONSTRAINT fk_hcd_dg FOREIGN KEY (id_diagnostico) REFERENCES diagnostico_tipo (id_diagnostico),
+PRIMARY KEY (id_historial_clinica,id_diagnostico)
+);
+
+-- 19. Creación de nueva tabla tipo_estudio
+CREATE TABLE tipo_estudio (
+    id_tipo_estudio INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL
+);
+
+
 -- Agregación de campo 'Asistencia' tabla turno
 ALTER TABLE turno ADD COLUMN asistencia boolean;
 
 -- Vinculamos Obra Social con Paciente
 ALTER TABLE paciente ADD COLUMN id_obra_social INT;
 
--- Crear la clave foranea
+-- Crear la clave foranea de paciente con obra_social
 ALTER TABLE paciente
 ADD CONSTRAINT fk_paciente_obra
 FOREIGN KEY (id_obra_social)
 REFERENCES obra_social(id_obra_social);
 
+-- Mejoras 23-09-2025 --
+ 
 -- Agregación de campo 'monto_total' tabla Factura
 ALTER TABLE factura ADD COLUMN monto_total DECIMAL(10,2) NOT NULL;
 
@@ -178,7 +214,7 @@ ALTER TABLE factura ADD COLUMN monto_afiliado DECIMAL(10,2) NOT NULL;
 ALTER TABLE medico 
 ADD COLUMN id_especialidad INT;
 
--- Crear la clave foránea
+-- Crear la clave foránea de médico con especialidad
 ALTER TABLE medico 
 ADD CONSTRAINT fk_especialidad_medico
 FOREIGN KEY (id_especialidad)
@@ -187,7 +223,7 @@ REFERENCES especialidad (id_especialidad);
 -- Vinculamos Médico con Consultorio
 ALTER TABLE medico ADD COLUMN id_consultorio INT;
 
--- Crear la clave foranea
+-- Crear la clave foranea de médico con consultorio
 ALTER TABLE medico
 ADD CONSTRAINT fk_consultorio_medico
 FOREIGN KEY (id_consultorio)
@@ -196,7 +232,7 @@ REFERENCES consultorio (id_consultorio);
 -- Vinculamos Diagnostico con Médico
 ALTER TABLE diagnostico ADD COLUMN id_medico INT;
 
--- Crear la clave foranea
+-- Crear la clave foranea de diagnostico con médico
 ALTER TABLE diagnostico
 ADD CONSTRAINT fk_medico_diagnostico
 FOREIGN KEY (id_medico)
@@ -207,24 +243,39 @@ REFERENCES medico (id_medico);
 ALTER TABLE turno 
 DROP FOREIGN KEY id_motivo_cancelacion;
 
+-- Eliminación de foreign key motivo_cancelacion en la tabla turno
 ALTER TABLE turno 
 DROP FOREIGN KEY fk_turno_motivo;
 
--- Eliminación tabla Motivo Cancelación
+-- Eliminación de la tabla Motivo Cancelación
 DROP TABLE motivo_cancelacion;
 
-
+-- Eliminación de foreign key de turno en la tabla diagnostico
 ALTER TABLE diagnostico 
 DROP FOREIGN KEY fk_diagnostico_turno;
 
 
--- Eliminación de diagnostico
+-- Eliminación de turno de diagnostico
 ALTER TABLE diagnostico
 DROP COLUMN id_turno;
 
--- Eliminación de medico
+-- Eliminación de foreign key de diagnostico en la tabla médico
 ALTER TABLE medico 
 DROP FOREIGN KEY fk_diagnostico_medico;
 
+-- Eliminación de diagnostico de médico
 ALTER TABLE medico
-DROP COLUMN id_diagnostico;
+DROP COLUMN id_diagnostico; 
+
+-- Mejoras 30-09-2025 --
+
+-- Vinculamos resultado_estudio con tipo_estudio
+ALTER TABLE resultado_estudio
+ADD id_tipo_estudio INT NOT NULL,
+ADD CONSTRAINT fk_resultado_tipo FOREIGN KEY (id_tipo_estudio) REFERENCES tipo_estudio(id_tipo_estudio);
+
+
+-- Vinculamos resultado_estudio con turno
+ALTER TABLE resultado_estudio
+ADD id_turno INT NULL,
+ADD CONSTRAINT fk_resultado_turno FOREIGN KEY (id_turno) REFERENCES turno(id_turno);
