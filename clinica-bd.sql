@@ -137,20 +137,20 @@ CREATE TABLE obra_social(
 
 -- 14. telefono_medico
 CREATE TABLE telefono_medico(
-    id_telefono_medico int auto_increment primary key,
-    id_medico int not null,
-    telefono varchar(20) not null,
-    tipo varchar(20) NOT NULL,
-    CONSTRAINT FK_medico_telefono foreign key (id_medico) REFERENCES medico(id_medico)
+  id_telefono_medico int auto_increment primary key,
+  id_medico int not null,
+  telefono varchar(20) not null,
+  tipo varchar(20) NOT NULL,
+  CONSTRAINT FK_medico_telefono foreign key (id_medico) REFERENCES medico(id_medico)
 );
 
 -- 15. Creamos una tabla intermedia para una relación de muchos a muchos entre Médico y Especialidad
 CREATE TABLE medico_especialidad (
-    id_medico INT,
-    id_especialidad INT,
-    PRIMARY KEY (id_medico, id_especialidad),
-    FOREIGN KEY (id_medico) REFERENCES medico(id_medico),
-    FOREIGN KEY (id_especialidad) REFERENCES especialidad(id_especialidad)
+id_medico INT,
+id_especialidad INT,
+PRIMARY KEY (id_medico, id_especialidad),
+FOREIGN KEY (id_medico) REFERENCES medico(id_medico),
+FOREIGN KEY (id_especialidad) REFERENCES especialidad(id_especialidad)
 );
 
 -- 16. Creación de nueva tabla historia_clinica
@@ -158,9 +158,10 @@ CREATE TABLE historia_clinica(
 id_historia_clinica INT AUTO_INCREMENT PRIMARY KEY,
 id_paciente INT NOT NULL,
 id_medico INT NOT NULL,
+id_turno INT NOT NULL,
 fecha_atencion DATETIME NOT NULL,
 observaciones TEXT,
-CONSTRAINT fk_hc_paciente FOREIGN KEY (id_paciente) REFERENCES pacientec(id_paciente),
+CONSTRAINT fk_hc_paciente FOREIGN KEY (id_paciente) REFERENCES paciente(id_paciente),
 CONSTRAINT fk_hc_medico FOREIGN KEY (id_medico) REFERENCES medico (id_medico)
 );
 
@@ -168,30 +169,50 @@ CONSTRAINT fk_hc_medico FOREIGN KEY (id_medico) REFERENCES medico (id_medico)
 CREATE TABLE diagnostico_tipo(
 id_diagnostico_tipo INT AUTO_INCREMENT PRIMARY KEY,
 nombre VARCHAR(100) NOT NULL,
-descripcion TEXT
+descripcion TEXT NOT NULL
 );
 
 -- 18. Creamos una tabla intermedia para una relación de muchos a muchos entre historia_clinica y diagnostico_tipo
 CREATE TABLE historia_clinica_diagnostico(
-id_historial_clinica INT NOT NULL,
+id_historia_clinica INT NOT NULL,
 id_diagnostico INT NOT NULL,
-CONSTRAINT fk_hcd_hc FOREIGN KEY (id_historial_clinica) REFERENCES historial_clinica (id_historial_clinica),
-CONSTRAINT fk_hcd_dg FOREIGN KEY (id_diagnostico) REFERENCES diagnostico_tipo (id_diagnostico),
-PRIMARY KEY (id_historial_clinica,id_diagnostico)
+CONSTRAINT fk_hcd_hc FOREIGN KEY (id_historia_clinica) REFERENCES historia_clinica (id_historia_clinica),
+CONSTRAINT fk_hcd_dg FOREIGN KEY (id_diagnostico) REFERENCES diagnostico (id_diagnostico),
+PRIMARY KEY (id_historia_clinica,id_diagnostico)
 );
 
--- 19. Creación de nueva tabla tipo_estudio
-CREATE TABLE tipo_estudio (
-    id_tipo_estudio INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL
+
+-- 19. Creación de nueva tabla administracion_paciente
+CREATE TABLE administracion_paciente(
+id_administrativo INT AUTO_INCREMENT PRIMARY KEY,
+cambio_de_obra_social BOOLEAN NOT NULL,
+id_factura INT NOT NULL,
+id_obra_social INT NOT NULL,
+id_turno INT NOT NULL,
+CONSTRAINT fk_adm_factura FOREIGN KEY (id_factura) REFERENCES factura (id_factura),
+CONSTRAINT fk_adm_obra_social FOREIGN KEY (id_obra_social) REFERENCES obra_social (id_obra_social),
+CONSTRAINT fk_adm_turno FOREIGN KEY (id_turno) REFERENCES turno (id_turno)
+);
+
+-- 20. Creación de nueva tabla observación
+CREATE TABLE observacion(
+id_observacion INT AUTO_INCREMENT PRIMARY KEY,
+id_turno INT NOT NULL,
+fecha_hora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+titulo VARCHAR(120) NULL,
+contenido TEXT NOT NULL,
+es_preliminar BOOLEAN NOT NULL DEFAULT TRUE, 
+CONSTRAINT fk_obs_turno FOREIGN KEY (id_turno) REFERENCES turno(id_turno) 
 );
 
 
 -- Agregación de campo 'Asistencia' tabla turno
 ALTER TABLE turno ADD COLUMN asistencia boolean;
 
+
 -- Vinculamos Obra Social con Paciente
 ALTER TABLE paciente ADD COLUMN id_obra_social INT;
+
 
 -- Crear la clave foranea de paciente con obra_social
 ALTER TABLE paciente
@@ -267,15 +288,23 @@ DROP FOREIGN KEY fk_diagnostico_medico;
 ALTER TABLE medico
 DROP COLUMN id_diagnostico; 
 
+-- Eliminación de historial_paciente y resultado_estudio
+DROP TABLE historial_paciente;
+DROP TABLE resultado_estudio;
+
 -- Mejoras 30-09-2025 --
 
--- Vinculamos resultado_estudio con tipo_estudio
-ALTER TABLE resultado_estudio
-ADD id_tipo_estudio INT NOT NULL,
-ADD CONSTRAINT fk_resultado_tipo FOREIGN KEY (id_tipo_estudio) REFERENCES tipo_estudio(id_tipo_estudio);
 
 
--- Vinculamos resultado_estudio con turno
-ALTER TABLE resultado_estudio
-ADD id_turno INT NULL,
-ADD CONSTRAINT fk_resultado_turno FOREIGN KEY (id_turno) REFERENCES turno(id_turno);
+-- Vinculamos diagnostico con diagnostico_tipo
+ALTER TABLE diagnostico
+ADD id_diagnostico_tipo INT NULL,
+ADD CONSTRAINT fk_dg_diagnostico_tipo FOREIGN KEY (id_diagnostico_tipo) REFERENCES diagnostico_tipo (id_diagnostico_tipo);
+ 
+
+-- Vinculamos administrativo_paciente con tipo_evento
+ALTER TABLE administracion_paciente 
+ADD id_tipo_evento INT NOT NULL,
+ADD CONSTRAINT fk_adm_tipo_evento FOREIGN KEY (id_tipo_evento) REFERENCES tipo_evento (id_tipo_evento);
+
+DROP DATABASE IF EXISTS clinica;
