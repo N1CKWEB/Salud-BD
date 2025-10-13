@@ -200,19 +200,7 @@ CREATE TABLE historia_clinica (
 
 
 -- =========================================================
--- 16. Historial clinico del diagnostico 
--- =========================================================
-CREATE TABLE historia_clinica_diagnostico (
-    id_historia_clinica INT NOT NULL,
-    id_diagnostico INT NOT NULL,
-    PRIMARY KEY (id_historia_clinica, id_diagnostico),
-    FOREIGN KEY (id_historia_clinica) REFERENCES historia_clinica(id_historia_clinica),
-    FOREIGN KEY (id_diagnostico) REFERENCES diagnostico(id_diagnostico)
-) ENGINE=InnoDB;
-
-
--- =========================================================
--- 17. Administración del paciente
+-- 16. Administración del paciente
 -- =========================================================
 CREATE TABLE administracion_paciente (
     id_administrativo INT AUTO_INCREMENT PRIMARY KEY,
@@ -228,7 +216,7 @@ CREATE TABLE administracion_paciente (
 ) ENGINE=InnoDB;
 
 -- =========================================================
--- 18. Observaciones
+-- 17. Observaciones
 -- =========================================================
 CREATE TABLE observacion (
     id_observacion INT AUTO_INCREMENT PRIMARY KEY,
@@ -243,3 +231,9 @@ CREATE TABLE observacion (
 -- Vincular Paciente con Obra Social
 ALTER TABLE paciente ADD COLUMN id_obra_social INT;
 ALTER TABLE paciente ADD CONSTRAINT fk_paciente_obra FOREIGN KEY (id_obra_social) REFERENCES obra_social(id_obra_social);
+
+
+-- Vincular Historia Clinica con Diagnostico
+ALTER TABLE historia_clinica ADD COLUMN id_diagnostico INT;
+ALTER TABLE historia_clinica 
+ADD CONSTRAINT fk_diagnostico_clinica FOREIGN KEY (id_diagnostico) REFERENCES diagnostico (id_diagnostico);
